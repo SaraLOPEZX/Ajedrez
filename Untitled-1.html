@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tablero de Ajedrez</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+      background: linear-gradient(45deg, #f0d9b5, #b58863);
+      background-size: 400% 400%;
+      animation: gradientAnimation 6s ease infinite;
+    }
+
+    @keyframes gradientAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .chess-board {
+      display: grid;
+      grid-template-columns: repeat(8, 60px);
+      grid-template-rows: repeat(8, 60px);
+      gap: 0;
+      width: 480px;
+      height: 480px;
+      border: 2px solid #333;
+      position: relative;
+    }
+
+    .square {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 60px;
+      height: 60px;
+      font-size: 2em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .white-square {
+      background-color: #f0d9b5;
+    }
+
+    .black-square {
+      background-color: #b58863;
+    }
+
+    .highlight {
+      background-color: #ffcc00; 
+    }
+
+    .timer {
+      font-size: 2.5em;
+      font-weight: bold;
+      color: #fff;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 10px 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+      display: inline-block;
+      transition: background-color 0.3s ease;
+    }
+
+    .white-turn {
+      background-color: rgba(255, 255, 255, 0.7);
+    }
+
+    .black-turn {
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+
+    .timer span {
+      color: #f0d9b5;
+    }
+
+    #timer {
+      font-size: 1.5em;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    .timer-container {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-around;
+      width: 480px;
+    }
+
+  </style>
+</head>
+<body>
+
+
+  <div class="chess-board" id="chess-board"></div>
+
+  
+  <div class="timer-container">
+    <div class="timer" id="white-time">00:00</div>
+    <div class="timer" id="black-time">00:00</div>
+  </div>
+
+  <script>
+    
+    const initialBoard = [
+      ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'], 
+      ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'], 
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
+      [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '], 
+      ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'], 
+      ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'], 
+    ];
+
+    let selectedPiece = null;  
+    let currentPlayer = 'white';  
+    let whiteTime = 0, blackTime = 0; 
+    let whiteTimer, blackTimer;  
+
+    function createChessBoard() {
+      const board = document.getElementById('chess-board');
+      board.innerHTML = '';  
+
+      for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+       
+          let squareClass = (row + col) % 2 === 0 ? 'white-square' : 'black-square';
+          
+         
+          const square = document.createElement('div');
+          square.classList.add('square', squareClass);
+          
+          
+          const piece = initialBoard[row][col];
+          if (piece !== ' ') {
+            square.textContent = piece.toUpperCase(); 
+          }
+
+         
+          square.addEventListener('click', () => handleSquareClick(row, col, square));
+          board.appendChild(square);
+        }
+      }
+    }
+
+    function handleSquareClick(row, col, square) {
+      if (selectedPiece) {
+       
+        const [selectedRow, selectedCol] = selectedPiece;
+        const piece = initialBoard[selectedRow][selectedCol];
+
+       
+        if (isValidMove(piece, selectedRow, selectedCol, row, col)) {
+          initialBoard[row][col] = piece;  
+          initialBoard[selectedRow][selectedCol] = ' ';  
+          selectedPiece = null;  
+          currentPlayer = currentPlayer === 'white' ? 'black' : 'white'; 
+        
+          createChessBoard();
+          stopTimer();  
+          startTimer();
+        }
+      } else {
+        
+        if (initialBoard[row][col] !== ' ' && (currentPlayer === 'white' && initialBoard[row][col] === initialBoard[row][col].toUpperCase()) || 
+            (currentPlayer === 'black' && initialBoard[row][col] === initialBoard[row][col].toLowerCase())) {
+          selectedPiece = [row, col];  
+          highlightValidMoves(row, col); 
+        }
+      }
+    }
+
+    function highlightValidMoves(row, col) {
+
+      const board = document.getElementById('chess-board');
+      const squares = board.getElementsByClassName('square');
+      Array.from(squares).forEach(square => square.classList.remove('highlight'));
+
+     
+      const squareIndex = row * 8 + col;
+      squares[squareIndex].classList.add('highlight');
+    }
+
+    function isValidMove(piece, fromRow, fromCol, toRow, toCol) {
+     
+      return true;
+    }
+    function updateTimers() {
+      if (currentPlayer === 'white') {
+        whiteTime++;
+      } else {
+        blackTime++;
+      }
+
+   
+      document.getElementById('white-time').textContent = formatTime(whiteTime);
+      document.getElementById('black-time').textContent = formatTime(blackTime);
+    }
+
+    function formatTime(time) {
+      const minutes = Math.floor(time / 60);
+      const seconds = time % 60;
+      return `${pad(minutes)}:${pad(seconds)}`;
+    }
+
+   
+    function pad(num) {
+      return num < 10 ? '0' + num : num;
+    }
+
+  
+    function startTimer() {
+      if (currentPlayer === 'white') {
+        document.getElementById('white-time').parentNode.classList.add('white-turn');
+        document.getElementById('black-time').parentNode.classList.remove('black-turn');
+        if (whiteTimer) clearInterval(whiteTimer);
+        whiteTimer = setInterval(updateTimers, 1000);
+      } else {
+        document.getElementById('black-time').parentNode.classList.add('black-turn');
+        document.getElementById('white-time').parentNode.classList.remove('white-turn');
+        if (blackTimer) clearInterval(blackTimer);
+        blackTimer = setInterval(updateTimers, 1000);
+      }
+    }
+
+ 
+    function stopTimer() {
+      if (currentPlayer === 'white') {
+        clearInterval(whiteTimer);
+      } else {
+        clearInterval(blackTimer);
+      }
+    }
+
+   
+    window.onload = function() {
+      createChessBoard();
+      startTimer();  
+    };
+  </script>
+
+</body>
+</html>
+
+   
